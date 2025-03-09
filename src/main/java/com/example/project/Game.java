@@ -23,8 +23,27 @@ public class Game {
         } else if (p1Rank > p2Rank) {
             return "Player 2 wins!";
         } else {
-            // If hands are equal, break the tie.
-            return breakTie(p1, p2);
+            // Tie-breaking logic inlined.
+            ArrayList<Card> p1Cards = p1.getAllCards();
+            ArrayList<Card> p2Cards = p2.getAllCards();
+
+            // sort algorithm
+            sortCards(p1Cards);
+            sortCards(p2Cards);
+
+            // Compare cards from highest to lowest.
+            for (int i = p1Cards.size() - 1; i >= 0; i--) {
+                int p1CardRank = getRankIndex(p1Cards.get(i).getRank());
+                int p2CardRank = getRankIndex(p2Cards.get(i).getRank());
+
+                if (p1CardRank > p2CardRank) {
+                    return "Player 1 wins!";
+                } else if (p1CardRank < p2CardRank) {
+                    return "Player 2 wins!";
+                }
+            }
+            // If every card is the same, it's a tie.
+            return "Tie!";
         }
     }
 
@@ -38,31 +57,6 @@ public class Game {
         }
         // Default to worst if nothing matches.
         return handRanks.length;
-    }
-
-    // Break the tie by comparing the individual cards.
-    private static String breakTie(Player p1, Player p2) {
-        // Grab all cards for both players.
-        ArrayList<Card> p1Cards = p1.getAllCards();
-        ArrayList<Card> p2Cards = p2.getAllCards();
-
-        // Sort the cards in each hand.
-        p1.sortAllCards();
-        p2.sortAllCards();
-
-        // Compare cards from highest to lowest.
-        for (int i = p1Cards.size() - 1; i >= 0; i--) {
-            int p1Rank = getRankIndex(p1Cards.get(i).getRank());
-            int p2Rank = getRankIndex(p2Cards.get(i).getRank());
-
-            if (p1Rank > p2Rank) {
-                return "Player 1 wins!";
-            } else if (p1Rank < p2Rank) {
-                return "Player 2 wins!";
-            }
-        }
-        // If every card is the same, it's a tie.
-        return "Tie!";
     }
 
     // Get the index of a card rank from the utility's list.
@@ -81,7 +75,7 @@ public class Game {
     public static void play() {
         // Build and shuffle the deck.
         ArrayList<Card> deck = createDeck();
-        Collections.shuffle(deck);
+        Collections.shuffle(deck); // Using shuffle is allowed.
 
         // Create two players.
         Player p1 = new Player();
@@ -121,12 +115,28 @@ public class Game {
         String[] ranks = Utility.getRanks();
 
         // Make a card for every suit and rank.
-        for (String suit : suits) {
-            for (String rank : ranks) {
-                deck.add(new Card(rank, suit));
+        for (int i = 0; i < suits.length; i++) {
+            for (int j = 0; j < ranks.length; j++) {
+                deck.add(new Card(ranks[j], suits[i]));
             }
         }
         return deck;
     }
-}
 
+    // sort cards by their rank.
+    private static void sortCards(ArrayList<Card> cards) {
+        int n = cards.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                int rank1 = getRankIndex(cards.get(j).getRank());
+                int rank2 = getRankIndex(cards.get(j + 1).getRank());
+                if (rank1 > rank2) {
+                    // Swap cards at positions j and j+1.
+                    Card temp = cards.get(j);
+                    cards.set(j, cards.get(j + 1));
+                    cards.set(j + 1, temp);
+                }
+            }
+        }
+    }
+}
